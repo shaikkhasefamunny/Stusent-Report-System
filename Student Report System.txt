@@ -1,0 +1,87 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+// Base class for grading display (polymorphism)
+class GradeFormat {
+public:
+    virtual void displayGrade(double avg) = 0; // pure virtual function
+};
+
+// Derived class: Letter Grade
+class LetterGrade : public GradeFormat {
+public:
+    void displayGrade(double avg) override {
+        if (avg >= 90) cout << "Grade: A\n";
+        else if (avg >= 75) cout << "Grade: B\n";
+        else if (avg >= 60) cout << "Grade: C\n";
+        else cout << "Grade: F\n";
+    }
+};
+
+// Derived class: Percentage Format
+class PercentageGrade : public GradeFormat {
+public:
+    void displayGrade(double avg) override {
+        cout << "Percentage: " << avg << "%\n";
+    }
+};
+
+// Student class
+class Student {
+    int rollNo;
+    int marks[3];
+public:
+    Student(int r, int m1, int m2, int m3) {
+        rollNo = r;
+        marks[0] = m1;
+        marks[1] = m2;
+        marks[2] = m3;
+    }
+
+    // Function overloading for average
+    double average() {   // average of all 3 subjects
+        return (marks[0] + marks[1] + marks[2]) / 3.0;
+    }
+
+    double average(int n) { // average of first n subjects
+        int sum = 0;
+        for (int i = 0; i < n && i < 3; i++) sum += marks[i];
+        return sum / (double)n;
+    }
+
+    void saveToFile() {
+        ofstream fout("student_results.txt", ios::app);
+        fout << "Roll No: " << rollNo
+             << ", Marks: " << marks[0] << " " << marks[1] << " " << marks[2]
+             << ", Average: " << average() << endl;
+        fout.close();
+    }
+
+    void showResult(GradeFormat* gf) {
+        cout << "Roll No: " << rollNo << endl;
+        cout << "Marks: " << marks[0] << ", " << marks[1] << ", " << marks[2] << endl;
+        double avg = average();
+        gf->displayGrade(avg); // polymorphic call
+    }
+};
+
+int main() {
+    Student s1(101, 85, 90, 78);
+
+    // Save results to file
+    s1.saveToFile();
+
+    // Display results in different formats using polymorphism
+    LetterGrade lg;
+    PercentageGrade pg;
+
+    cout << "=== Letter Grade Format ===\n";
+    s1.showResult(&lg);
+
+    cout << "\n=== Percentage Format ===\n";
+    s1.showResult(&pg);
+
+    return 0;
+}
